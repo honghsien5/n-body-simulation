@@ -19,6 +19,8 @@ typedef struct {
 int n, nSize, dt;
 //total number of collisions to occur
 int collisions = 0;
+//flags for bodies that have experienced collision
+int collisionFlags[N_SIZE];
 //postion, velocity
 point p[N_SIZE], v[N_SIZE], f[N_SIZE];
 //force and mass for each body
@@ -27,13 +29,16 @@ double G = 6.67e-11;
 
 void calculateForces();
 void moveBodies();
+void detectCollisions();
 
 int main(int argc, char *argv[]){
 
     int i;
-    FILE *outputFile;
     struct timeval startTime, endTime;
     int seconds, micros;
+    FILE *outputFile;
+
+    outputFile = fopen("nBodyResults.txt", "w");
 
     if (argc > 3){
         //number of bodies
@@ -50,17 +55,36 @@ int main(int argc, char *argv[]){
     int a = 0, b = 0;
     //Initialize the positions, velocities, forces, and masses
     for (i = 1; i < n; i++){
-        p[i].x = a;
-        p[i].y = b;
+        if (i == 1){
+            p[i].x = 1;
+            p[i].y = 1;
+        }
+        else if (i == 2){
+            p[i].x = 1;
+            p[i].y = 4;
+        }
+        else{
+            p[i].x = a;
+            p[i].y = b;
+        }
         v[i].x = 0.0;
         v[i].y = 0.0;
         f[i].x = 0.0;
         f[i].y = 0.0;
         m[i] = 1.0;
+        collisionFlags[i] = 0;
         //Temporary way plotting bodies
-        a += rand() % 3;
-        b += rand() % 3 + 1;
+        a += 2;//rand() % 3;
+        b += 2;//rand() % 3 + 1;
     }
+
+    //May not be needed later
+    fprintf(outputFile, "Before moving:\n");
+    fprintf(outputFile, "%9s%9s%9s%9s\n", "x", "y", "vx", "vy");
+    for (i = 1; i < n; i++){
+        fprintf(outputFile, "%9.4f %9.4f %9.4f %9.4f\n", p[i].x, p[i].y, v[i].x, v[i].y);
+    }
+    fprintf(outputFile, "\n");
 
     gettimeofday(&startTime, NULL);
 
@@ -73,6 +97,7 @@ int main(int argc, char *argv[]){
     */
     calculateForces();
     moveBodies();
+    detectCollisions();
 
     gettimeofday(&endTime, NULL);
 
@@ -86,8 +111,8 @@ int main(int argc, char *argv[]){
     printf("computation time = %d seconds, %d microseconds\n", seconds, micros);
     printf("number of collisions detected = %d\n", collisions);
 
-    outputFile = fopen("nBodyResults.txt", "w");
-
+    fprintf(outputFile, "After moving:\n");
+    fprintf(outputFile, "%9s%9s%9s%9s\n", "x", "y", "vx", "vy");
     for (i = 1; i < n; i++){
         fprintf(outputFile, "%9.4f %9.4f %9.4f %9.4f\n", p[i].x, p[i].y, v[i].x, v[i].y);
     }
@@ -133,4 +158,9 @@ void moveBodies(){
         // reset force vector
         f[i].x = f[i].y = 0.0;
     }
+}
+
+//Updates the velocities of bodies that have experienced a collision
+void detectCollisions(){
+    
 }
