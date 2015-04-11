@@ -60,8 +60,8 @@ public class Main {
                 bodies[j].forceX = bodies[j].forceX - magnitude*direction.x/distance;
                 bodies[i].forceY = bodies[i].forceY + magnitude*direction.y/distance;
                 bodies[j].forceY = bodies[j].forceY - magnitude*direction.y/distance;
-                System.out.println("Force 1: " + bodies[i].forceX +" " + bodies[i].forceY);
-                System.out.println("Force 2: " + bodies[j].forceX + " " + bodies[j].forceY);
+//                System.out.println("Force 1: " + bodies[i].forceX +" " + bodies[i].forceY);
+//                System.out.println("Force 2: " + bodies[j].forceX + " " + bodies[j].forceY);
             }
         }
     }
@@ -94,6 +94,19 @@ public class Main {
 
         }
     }
+    static void detectBoundary(Particle[] bodies){
+        for(int i = 0; i < bodies.length;i++){
+            double x = bodies[i].x;
+            double y = bodies[i].y;
+            if(x < -100 || x > 100){
+                bodies[i].velocityX = -bodies[i].velocityX;
+            }
+            if( y < -100 || y > 100){
+                bodies[i].velocityY = -bodies[i].velocityY;
+            }
+
+        }
+    }
     static void calculateCollision(Particle p1, Particle p2){
         double x1  = p1.x;
         double y1  = p1.y;
@@ -103,14 +116,18 @@ public class Main {
         double y2  = p2.y;
         double v2x = p2.velocityX;
         double v2y = p2.velocityY;
+        System.out.println("Collision between particle "+ p1.id +" and particle " + p2.id);
+        System.out.println("Before:");
         System.out.println(p1.velocityX + " " + p1.velocityY);
         System.out.println(p2.velocityX + " " + p2.velocityY);
         p1.velocityX = (v2x*Math.pow(x2-x1,2) + v2y*(x2-x1)*(y2-y1) + v1x*Math.pow(y2-y1,2) - v1y*(x2-x1)*(y2-y1))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
         p1.velocityY = (v2x*(x2-x1)*(y2-y1) + v2y*Math.pow(y2-y1,2) - v1x*(y2-y1)*(x2-x1) + v1y*Math.pow(x2-x1,2))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
         p2.velocityX = (v1x*Math.pow(x2-x1,2) + v1y*(x2-x1)*(y2-y1) + v2x*Math.pow(y2-y1,2) - v2y*(x2-x1)*(y2-y1))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
         p2.velocityY = (v1x*(x2-x1)*(y2-y1) + v1y*Math.pow(y2-y1,2) - v2x*(y2-y1)*(x2-x1) + v2y*Math.pow(x2-x1,2))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        System.out.println("after:");
         System.out.println(p1.velocityX + " " + p1.velocityY);
         System.out.println(p2.velocityX + " " + p2.velocityY);
+        System.out.println();
     }
     public static void main(String[] args) {
 	// write your code here
@@ -160,6 +177,7 @@ public class Main {
         for (int i = 0 ; i < numTimeSteps;i++){
             calculateForces(bodies);
             moveBodies(bodies, sizeTimeSteps);
+//            detectBoundary(bodies);
             detectCollision(bodies);
             System.out.println("Time: " + i*sizeTimeSteps +"ms Collision Count: " + collisionCount);
             printBodies(bodies);
