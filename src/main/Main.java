@@ -1,5 +1,13 @@
 package main;
 
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.io.*;
 
 /**
@@ -42,11 +50,14 @@ class Particle{
 }
 
 
-public class Main {
+public class Main extends JPanel{
     //initializing constants and variables
     static double G = 6.67*Math.pow(10,-11);
     static double mass = 1;
     static int collisionCount = 0;
+    static Particle[] bodies;
+    static int sizeTimeSteps;
+    static int numTimeSteps;
 
     //method for printing all particles' position
     static void printBodies(Particle[] bodies){
@@ -104,19 +115,20 @@ public class Main {
         for(int i = 0; i < bodies.length;i++){
             double x = bodies[i].x;
             double y = bodies[i].y;
-            if(x < -100){
-                System.out.println(bodies[i].id + " hits the left boundary and bounced.");
+            double r = bodies[i].radius;
+            if(x-r < -100){
+//                System.out.println(bodies[i].id + " hits the left boundary and bounced.");
                 bodies[i].velocityX = -bodies[i].velocityX;
-            }else if(x> 100){
-                System.out.println(bodies[i].id + " hits the right boundary and bounced.");
+            }else if(x+r> 100){
+//                System.out.println(bodies[i].id + " hits the right boundary and bounced.");
                 bodies[i].velocityX = -bodies[i].velocityX;
             }
 
-            if(y < -100){
-                System.out.println(bodies[i].id + " hits the bottom boundary and bounced.");
+            if(y-r < -100){
+//                System.out.println(bodies[i].id + " hits the bottom boundary and bounced.");
                 bodies[i].velocityY = -bodies[i].velocityY;
-            }else if(y > 100){
-                System.out.println(bodies[i].id + " hits the top boundary and bounced.");
+            }else if(y+r > 100){
+//                System.out.println(bodies[i].id + " hits the top boundary and bounced.");
                 bodies[i].velocityY = -bodies[i].velocityY;
             }
 
@@ -147,6 +159,32 @@ public class Main {
 //        System.out.println();
     }
 
+    public void drawCenteredCircle(Graphics2D g, double x, double y, double r) {
+        x = x-(r/2);
+        y = y-(r/2);
+        Ellipse2D.Double shape = new Ellipse2D.Double(x, y, 2*r, 2*r);
+        g.fill(shape);
+    }
+
+    public void paintComponent(Graphics gg) {
+        super.paintComponent(gg);
+
+        Graphics2D g = (Graphics2D) gg;
+
+    /* Enable anti-aliasing */
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int baseX = 150;
+        int baseY = 100;
+    /* Construct a shape and draw it */
+        for(int i = 0 ; i < bodies.length;i++){
+            drawCenteredCircle(g, baseX+100+bodies[i].x,baseY+100-bodies[i].y, bodies[i].radius);
+        }
+        g.drawRect(baseX,baseY,200,200);
+        //drawCenteredCircle(g, 300+50, 300+50,.5);
+
+
+    }
     public static void main(String[] args) {
 
         //check for the correct amount of arguments
@@ -158,24 +196,26 @@ public class Main {
             return;
         }
 
+
         //apply arguments
         int numBodies=Integer.parseInt(args[0]);
+        if(numBodies > 10){
+            System.out.println("Cannot process more than 10 bodies due to the init file constraint");
+            return;
+        }
         double radiusBodies = Double.parseDouble(args[1]);
-        int numTimeSteps = Integer.parseInt(args[2]);
-        int sizeTimeSteps;
+        numTimeSteps = Integer.parseInt(args[2]);
         if(args.length == 4){
             sizeTimeSteps = Integer.parseInt(args[3]);
         }else{
             sizeTimeSteps = 5000;
         }
-
-        Particle[] bodies = new Particle[numBodies];
+        bodies = new Particle[numBodies];
         String fileName = "init.txt";
         String line;
 
         //input file with init location
         try{
-
             FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
@@ -195,6 +235,42 @@ public class Main {
                             + fileName + "'");
         }
 
+
+        //windows configuration
+        final JFrame frame = new JFrame();
+        frame.setTitle("Particle world");
+        frame.setSize(500, 500);
+        frame.addWindowListener( new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+        final JLabel timeStepLabel = new JLabel("",JLabel.CENTER);
+        timeStepLabel.setText("TimeStep : ");
+        timeStepLabel.setVerticalTextPosition(JLabel.TOP);
+        timeStepLabel.setHorizontalTextPosition(JLabel.CENTER);
+        frame.add(timeStepLabel,BorderLayout.NORTH);
+
+        final JSlider speedSlider = new JSlider(JSlider.HORIZONTAL,1,1000,sizeTimeSteps);
+        speedSlider.setMajorTickSpacing(100);
+        speedSlider.setMinorTickSpacing(10);
+        speedSlider.setPaintLabels(true);
+        speedSlider.setPaintTicks(true);
+        speedSlider.setPaintTrack(true);
+        speedSlider.setAutoscrolls(true);
+        speedSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                sizeTimeSteps = speedSlider.getValue();
+                frame.repaint();
+            }
+        });
+        frame.add(speedSlider,BorderLayout.SOUTH);
+        Container contentPane = frame.getContentPane();
+        contentPane.add(new Main());
+        frame.setVisible(true);
+
         //start counting time
         long startTime = System.currentTimeMillis();
         long estimatedTime;
@@ -203,8 +279,9 @@ public class Main {
             moveBodies(bodies, sizeTimeSteps);
             detectBoundary(bodies);
             detectCollision(bodies);
-            //System.out.println("Computation time:Time: " + i*sizeTimeSteps +"ms Collision Count: " + collisionCount);
-           // printBodies(bodies);
+
+            timeStepLabel.setText("TimeStep: "+ i );
+            frame.repaint();
         }
         estimatedTime = System.currentTimeMillis() - startTime;
         long seconds = estimatedTime/1000;
