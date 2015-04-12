@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 class Particle{
+    int id;
     double x,y;
     double velocityX,velocityY;
     double forceX,forceY;
@@ -18,7 +19,8 @@ class Particle{
         forceX = 0;
         forceY = 0;
     }
-    Particle(double x, double y, double radius){
+    Particle(int id,double x, double y, double radius){
+        this.id = id;
         this.x=x;
         this.y=y;
         velocityX = 0 ;
@@ -38,7 +40,7 @@ class Particle{
 
 public class Main {
     static double G = 6.67*Math.pow(10,-11);
-    static double mass = 16000;
+    static double mass = 1;
     static int collisionCount = 0;
     static void printBodies(Particle[] bodies){
         for(int i = 0 ; i < bodies.length;i++){
@@ -58,7 +60,8 @@ public class Main {
                 bodies[j].forceX = bodies[j].forceX - magnitude*direction.x/distance;
                 bodies[i].forceY = bodies[i].forceY + magnitude*direction.y/distance;
                 bodies[j].forceY = bodies[j].forceY - magnitude*direction.y/distance;
-
+                System.out.println("Force 1: " + bodies[i].forceX +" " + bodies[i].forceY);
+                System.out.println("Force 2: " + bodies[j].forceX + " " + bodies[j].forceY);
             }
         }
     }
@@ -73,6 +76,7 @@ public class Main {
 
             bodies[i].velocityX = bodies[i].velocityX + deltaV.x;
             bodies[i].velocityY = bodies[i].velocityY + deltaV.y;
+            System.out.println("Velocity "+ i + ": " + bodies[i].velocityX +" " + bodies[i].velocityY);
             bodies[i].x = bodies[i].x + deltaP.x;
             bodies[i].y = bodies[i].y + deltaP.y;
             bodies[i].forceX = 0;
@@ -94,14 +98,19 @@ public class Main {
         double x1  = p1.x;
         double y1  = p1.y;
         double v1x = p1.velocityX;
-        double v1y = p1.velocityY
+        double v1y = p1.velocityY;
         double x2  = p2.x;
         double y2  = p2.y;
         double v2x = p2.velocityX;
         double v2y = p2.velocityY;
-//        p1.velocityX = (v2x*Math.pow((x2-x1),2)+v2y*(x2-x1)*(y2-y1)+v1x*Math.pow((y2-y1),2) - v1y*(x2-x1)*(y2-y1))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
-//        p1.velocityY = (v2x*(x2-x1)*(y2-y1)+v2y*Math.pow(y2-y1,2) - v1x*(y2-y1)*(x2-x1) + v1y*Math.pow(x2-x1,2))/(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
-//        p2.velocityX = ()
+        System.out.println(p1.velocityX + " " + p1.velocityY);
+        System.out.println(p2.velocityX + " " + p2.velocityY);
+        p1.velocityX = (v2x*Math.pow(x2-x1,2) + v2y*(x2-x1)*(y2-y1) + v1x*Math.pow(y2-y1,2) - v1y*(x2-x1)*(y2-y1))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        p1.velocityY = (v2x*(x2-x1)*(y2-y1) + v2y*Math.pow(y2-y1,2) - v1x*(y2-y1)*(x2-x1) + v1y*Math.pow(x2-x1,2))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        p2.velocityX = (v1x*Math.pow(x2-x1,2) + v1y*(x2-x1)*(y2-y1) + v2x*Math.pow(y2-y1,2) - v2y*(x2-x1)*(y2-y1))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        p2.velocityY = (v1x*(x2-x1)*(y2-y1) + v1y*Math.pow(y2-y1,2) - v2x*(y2-y1)*(x2-x1) + v2y*Math.pow(x2-x1,2))/(Math.pow(x2-x1,2) + Math.pow(y2-y1,2));
+        System.out.println(p1.velocityX + " " + p1.velocityY);
+        System.out.println(p2.velocityX + " " + p2.velocityY);
     }
     public static void main(String[] args) {
 	// write your code here
@@ -132,7 +141,7 @@ public class Main {
             for(int i = 0 ; i < numBodies ; i++){
                 line = bufferedReader.readLine();
                 String[] tempString = line.split(" ");
-                bodies[i] = new Particle(Double.parseDouble(tempString[0]),Double.parseDouble(tempString[1]),radiusBodies);
+                bodies[i] = new Particle(i,Double.parseDouble(tempString[0]),Double.parseDouble(tempString[1]),radiusBodies);
             }
             bufferedReader.close();
         }catch(FileNotFoundException ex) {
@@ -148,11 +157,11 @@ public class Main {
         }
 
 
-        for(int i = 0 ; i < numTimeSteps;i++){
+        for (int i = 0 ; i < numTimeSteps;i++){
             calculateForces(bodies);
             moveBodies(bodies, sizeTimeSteps);
             detectCollision(bodies);
-            System.out.println("Time: " + i*sizeTimeSteps +" Collision Count: " + collisionCount);
+            System.out.println("Time: " + i*sizeTimeSteps +"ms Collision Count: " + collisionCount);
             printBodies(bodies);
         }
 
