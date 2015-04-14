@@ -1,6 +1,8 @@
 package main;
 
 import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -9,6 +11,7 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.*;
+import java.lang.Boolean;
 
 /**
  * Particle class used for storing particle's information as well as testing if one interact with another
@@ -36,7 +39,7 @@ class Particle{
     Particle(double x, double y){
         this.x=x;
         this.y=y;
-        velocityX = 0 ;
+        velocityX = 0;
         velocityY = 0;
         forceX = 0;
         forceY = 0;
@@ -52,12 +55,13 @@ class Particle{
 
 public class Main extends JPanel{
     //initializing constants and variables
-    static double G = 6.67*Math.pow(10,-11);
-    static double mass = 1;
+    static final double G = 6.67*Math.pow(10,-11);
+    static final double mass = 1;
     static int collisionCount = 0;
     static Particle[] bodies;
     static int sizeTimeSteps;
     static int numTimeSteps;
+    static boolean graphicSwitch;
 
     //method for printing all particles' position
     static void printBodies(Particle[] bodies){
@@ -186,18 +190,21 @@ public class Main extends JPanel{
 
     }
     public static void main(String[] args) {
-
+        final JFrame frame = new JFrame();
+        final JLabel timeStepLabel = new JLabel("", JLabel.CENTER);
         //check for the correct amount of arguments
         if ( args.length < 3){
-            if( args.length > 4){
-                System.out.println("Max argument is 4");
-            }
-            System.out.println("Need more than three arguments.");
+            System.out.println("Need three or more arguments.");
+            return;
+        }
+        if( args.length > 5){
+            System.out.println("Max argument is 5");
             return;
         }
 
 
         //apply arguments
+
         int numBodies=Integer.parseInt(args[0]);
         if(numBodies > 10){
             System.out.println("Cannot process more than 10 bodies due to the init file constraint");
@@ -205,11 +212,19 @@ public class Main extends JPanel{
         }
         double radiusBodies = Double.parseDouble(args[1]);
         numTimeSteps = Integer.parseInt(args[2]);
-        if(args.length == 4){
-            sizeTimeSteps = Integer.parseInt(args[3]);
+        if(args.length < 4){
+            sizeTimeSteps = 500;
+
         }else{
-            sizeTimeSteps = 5000;
+            sizeTimeSteps = Integer.parseInt(args[3]);
         }
+        if(args.length < 5){
+            graphicSwitch = false;
+        }else{
+            graphicSwitch= Boolean.parseBoolean(args[4]);
+        }
+
+
         bodies = new Particle[numBodies];
         String fileName = "init.txt";
         String line;
@@ -235,41 +250,45 @@ public class Main extends JPanel{
                             + fileName + "'");
         }
 
+        if(graphicSwitch) {
+            //windows configuration
 
-        //windows configuration
-        final JFrame frame = new JFrame();
-        frame.setTitle("Particle world");
-        frame.setSize(500, 500);
-        frame.addWindowListener( new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-        final JLabel timeStepLabel = new JLabel("",JLabel.CENTER);
-        timeStepLabel.setText("TimeStep : ");
-        timeStepLabel.setVerticalTextPosition(JLabel.TOP);
-        timeStepLabel.setHorizontalTextPosition(JLabel.CENTER);
-        frame.add(timeStepLabel,BorderLayout.NORTH);
+            frame.setTitle("Particle world");
+            frame.setSize(500, 500);
+            frame.addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    System.exit(0);
+                }
+            });
 
-        final JSlider speedSlider = new JSlider(JSlider.HORIZONTAL,1,1000,sizeTimeSteps);
-        speedSlider.setMajorTickSpacing(100);
-        speedSlider.setMinorTickSpacing(10);
-        speedSlider.setPaintLabels(true);
-        speedSlider.setPaintTicks(true);
-        speedSlider.setPaintTrack(true);
-        speedSlider.setAutoscrolls(true);
-        speedSlider.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                sizeTimeSteps = speedSlider.getValue();
-                frame.repaint();
-            }
-        });
-        frame.add(speedSlider,BorderLayout.SOUTH);
-        Container contentPane = frame.getContentPane();
-        contentPane.add(new Main());
-        frame.setVisible(true);
+            timeStepLabel.setText("TimeStep : ");
+            timeStepLabel.setVerticalTextPosition(JLabel.TOP);
+            timeStepLabel.setHorizontalTextPosition(JLabel.CENTER);
+            frame.add(timeStepLabel, BorderLayout.NORTH);
+
+            final JSlider speedSlider = new JSlider(JSlider.HORIZONTAL, 1, 1000, sizeTimeSteps);
+            speedSlider.setMajorTickSpacing(100);
+            speedSlider.setMinorTickSpacing(10);
+            speedSlider.setPaintLabels(true);
+            speedSlider.setPaintTicks(true);
+            speedSlider.setPaintTrack(true);
+            speedSlider.setAutoscrolls(true);
+            speedSlider.addChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    sizeTimeSteps = speedSlider.getValue();
+                    frame.repaint();
+                }
+            });
+            frame.add(speedSlider, BorderLayout.SOUTH);
+            Container contentPane = frame.getContentPane();
+            contentPane.add(new Main());
+
+            frame.setVisible(true);
+
+        }
+
 
         //start counting time
         long startTime = System.currentTimeMillis();
@@ -279,9 +298,11 @@ public class Main extends JPanel{
             moveBodies(bodies, sizeTimeSteps);
             detectBoundary(bodies);
             detectCollision(bodies);
+            if(graphicSwitch) {
 
-            timeStepLabel.setText("TimeStep: "+ i );
-            frame.repaint();
+                timeStepLabel.setText("TimeStep: " + i);
+                frame.repaint();
+            }
         }
         estimatedTime = System.currentTimeMillis() - startTime;
         long seconds = estimatedTime/1000;
@@ -290,7 +311,7 @@ public class Main extends JPanel{
         System.out.println("collision count:\t" + collisionCount);
 
         try{
-            PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
+            PrintWriter writer = new PrintWriter("output_seq.txt", "UTF-8");
             //continue the operation for time steps
             for(int i = 0 ; i < bodies.length;i++){
                 writer.println("Particle " + bodies[i].id + ":");
@@ -309,7 +330,7 @@ public class Main extends JPanel{
                     "Error reading file '"
                             + "output.txt" + "'");
         }
-
+        return;
 
 
 
