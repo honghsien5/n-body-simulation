@@ -53,7 +53,7 @@ class Particle{
 }
 
 
-public class Main extends JPanel{
+public class nBody_seq extends JPanel{
     //initializing constants and variables
     static final double G = 6.67*Math.pow(10,-11);
     static final double mass = 1;
@@ -283,7 +283,7 @@ public class Main extends JPanel{
             });
             frame.add(speedSlider, BorderLayout.SOUTH);
             Container contentPane = frame.getContentPane();
-            contentPane.add(new Main());
+            contentPane.add(new nBody_seq());
 
             frame.setVisible(true);
 
@@ -330,6 +330,7 @@ public class Main extends JPanel{
                     "Error reading file '"
                             + "output.txt" + "'");
         }
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
         return;
 
 
