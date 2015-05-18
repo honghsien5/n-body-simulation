@@ -1,1 +1,2 @@
-# ParallelProject
+# N body particle simulation
+
