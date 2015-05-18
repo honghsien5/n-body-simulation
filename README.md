@@ -1,2 +1,2 @@
-# N body particle simulation
+# N-body particle simulation
 
