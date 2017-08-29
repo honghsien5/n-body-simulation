@@ -17,12 +17,15 @@ Execute `Java nBody_Seq` followed by the command-line arguments:
 ### Required Arguments:
 
 arg1 = Number of bodies
+
 arg2 = Size of the bodies
+
 arg3 = Number of time steps
 
 ### Optional Arugments:
 
 arg4 = Type the size of a time step, or it will run with a time step of 500
+
 arg5 = Type true to run with GUI, or it will run without it
 
 ### Example
@@ -35,13 +38,17 @@ Execute `Java nBody_Par` followed by the command-line arguments:
 ### Required Arguments:
 
 arg1 = Number of workers
+
 arg2 = Number of bodies
+
 arg3 = Size of the bodies
+
 arg4 = Number of time steps
 
 ### Optional Arugments:
 
 arg5 = Size of a time step. Default 500
+
 arg6 = Enabling GUI mode if this argument is true.
 
 ### Example
@@ -51,6 +58,7 @@ Java nBody_Seq 2 5 10000000 1000 false
 ## Additional notes:
 
 `make optimization` command would compile the programs with the -O flag
+
 `make clean` would clean up any generated .class files
 
 You can also run a testing python script by executing:
