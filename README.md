@@ -16,17 +16,17 @@ Execute `Java nBody_Seq` followed by the command-line arguments:
 
 ### Required Arguments:
 
-arg1 = Number of bodies
+* arg1 = Number of bodies
 
-arg2 = Size of the bodies
+* arg2 = Size of the bodies
 
-arg3 = Number of time steps
+* arg3 = Number of time steps
 
 ### Optional Arugments:
 
-arg4 = Type the size of a time step, or it will run with a time step of 500
+* arg4 = Type the size of a time step, or it will run with a time step of 500
 
-arg5 = Type true to run with GUI, or it will run without it
+* arg5 = Type true to run with GUI, or it will run without it
 
 ### Example
 ```
@@ -37,19 +37,19 @@ Execute `Java nBody_Par` followed by the command-line arguments:
 
 ### Required Arguments:
 
-arg1 = Number of workers
+* arg1 = Number of workers
 
-arg2 = Number of bodies
+* arg2 = Number of bodies
 
-arg3 = Size of the bodies
+* arg3 = Size of the bodies
 
-arg4 = Number of time steps
+* arg4 = Number of time steps
 
 ### Optional Arugments:
 
-arg5 = Size of a time step. Default 500
+* arg5 = Size of a time step. Default 500
 
-arg6 = Enabling GUI mode if this argument is true.
+* arg6 = Enabling GUI mode if this argument is true.
 
 ### Example
 ```
